@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/machariamarigi/ju0920/handlers"
+	"github.com/machariamarigi/ju0920/product-api/handlers"
 )
 
 func main()  {
