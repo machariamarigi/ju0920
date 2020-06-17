@@ -16,6 +16,11 @@ type Product struct {
 	DeletedOn		string
 }
 
+// GetProducts returns a list of the products
+func GetProducts () []*Product {
+	return ProductList
+}
+
 // ProductList is a list of static product data
 var ProductList = []*Product{
 	&Product{
