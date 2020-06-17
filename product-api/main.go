@@ -15,29 +15,31 @@ func main()  {
 	l := log.New(os.Stdout, "product-api: ", log.LstdFlags)
 
 	// create handlers
-	hh := handlers.NewHello(l)
-	gh := handlers.NewGoodbye(l)
+	ph := handlers.NewProducts(l)
 
 	// create a new server multiplexer and register handlers with their routes
 	sm := http.NewServeMux()
-	sm.Handle("/", hh)
-	sm.Handle("/goodbye", gh)
+	sm.Handle("/", ph)
 
 	// create a new server
 	s := &http.Server {
-		Addr: ":9090",
-		Handler: sm,
-		IdleTimeout: 120 * time.Second,
-		ReadTimeout: 1 * time.Second,
-		WriteTimeout: 1 * time.Second,
+		Addr: 				":9090",						// configure the bind address		
+		Handler: 			sm,									// set the default handelr
+		ErrorLog:			l,									// set set the logger for the server
+		IdleTimeout:	120 * time.Second,	// max time for connections using TCP Keep-Alive
+		ReadTimeout:	1 * time.Second,		// max time to read request from client
+		WriteTimeout:	1 * time.Second,		// max time to write request from client
 	}
 
 
 	// start the server
 	go func() {
+		l.Println("Starting the server at port 9090")
+
 		err := s.ListenAndServe()
 		if err != nil {
-			l.Fatal(err)
+			l.Printf("Error starting serving: %s\n", err)
+			os.Exit(1)
 		}
 	}()
 
