@@ -1,23 +1,35 @@
 package data
 
 import (
+	"encoding/json"
+	"io"
 	"time"
 )
 
 // Product defines the structure of an API product
 type Product struct {
-	ID					int
-	Name				string
-	Description	string
-	Price				float32
-	SKU					string
-	CreatedOn		string
-	UpdatedOn		string
-	DeletedOn		string
+	ID					int			`json:"id"`
+	Name				string	`json:"name"`
+	Description	string	`json:"description"`
+	Price				float32	`json:"price"`
+	SKU					string	`json:"sku"`
+	CreatedOn		string	`json:"_"`
+	UpdatedOn		string	`json:"_"`
+	DeletedOn		string	`json:"_"`
+}
+
+// Products is a collection of Product
+type Products []*Product
+
+// ToJSON serializes contents of the collection to JSON using json package's NeWEncoder
+// https://golang.org/pkg/encoding/json/#NewEncoder
+func (p*Products) ToJSON(w io.Writer) error {
+	e := json.NewEncoder(w)
+	return e.Encode(p)
 }
 
 // GetProducts returns a list of the products
-func GetProducts () []*Product {
+func GetProducts () Products {
 	return ProductList
 }
 
