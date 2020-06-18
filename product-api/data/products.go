@@ -37,12 +37,23 @@ func (p*Products) ToJSON(w io.Writer) error {
 }
 
 // GetProducts returns a list of the products
-func GetProducts () Products {
-	return ProductList
+func GetProducts() Products {
+	return productList
 }
 
+func AddProducts(p *Product) {
+	p.ID = getNextID()
+	productList = append(productList, p)
+}
+
+func getNextID() int {
+	lp := productList[len(productList) - 1]
+	return lp.ID + 1
+}
+
+
 // ProductList is a list of static product data
-var ProductList = []*Product{
+var productList = []*Product{
 	&Product{
 		ID:						1,
 		Name: 				"Latte",
