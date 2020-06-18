@@ -18,6 +18,14 @@ type Product struct {
 	DeletedOn		string	`json:"_"`
 }
 
+// FromJSON decodes json serialized content using json package's NeWDecoder
+// https://golang.org/pkg/encoding/json/#NewDecoder
+func (p *Product ) FromJSON(r io.Reader) error{
+	d := json.NewDecoder(r)
+	return d.Decode(p)
+}
+
+
 // Products is a collection of Product
 type Products []*Product
 
