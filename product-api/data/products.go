@@ -9,14 +9,14 @@ import (
 
 // Product defines the structure of an API product
 type Product struct {
-	ID					int			`json:"id"`
-	Name				string	`json:"name"`
-	Description	string	`json:"description"`
-	Price				float32	`json:"price"`
-	SKU					string	`json:"sku"`
-	CreatedOn		string	`json:"_"`
-	UpdatedOn		string	`json:"_"`
-	DeletedOn		string	`json:"_"`
+	ID           int     `json:"id"`
+	Name         string  `json:"name"`
+	Description  string  `json:"description"`
+	Price        float32 `json:"price"`
+	SKU          string  `json:"sku"`
+	CreatedOn    string  `json:"_"`
+	UpdatedOn    string  `json:"_"`
+	DeletedOn    string  `json:"_"`
 }
 
 // FromJSON decodes json serialized content using json package's NeWDecoder
