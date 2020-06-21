@@ -21,9 +21,9 @@ type Product struct {
 
 // FromJSON decodes json serialized content using json package's NeWDecoder
 // https://golang.org/pkg/encoding/json/#NewDecoder
-func (p *Product ) FromJSON(r io.Reader) error{
-	d := json.NewDecoder(r)
-	return d.Decode(p)
+func (product *Product ) FromJSON(r io.Reader) error{
+	decoder := json.NewDecoder(r)
+	return decoder.Decode(product)
 }
 
 
@@ -32,9 +32,9 @@ type Products []*Product
 
 // ToJSON serializes contents of the collection to JSON using json package's NeWEncoder
 // https://golang.org/pkg/encoding/json/#NewEncoder
-func (p*Products) ToJSON(w io.Writer) error {
-	e := json.NewEncoder(w)
-	return e.Encode(p)
+func (products*Products) ToJSON(requestWriter io.Writer) error {
+	encoder := json.NewEncoder(requestWriter)
+	return encoder.Encode(products)
 }
 
 // GetProducts returns a list of the products
@@ -42,35 +42,35 @@ func GetProducts() Products {
 	return productList
 }
 
-func AddProducts(p *Product) {
-	p.ID = getNextID()
-	productList = append(productList, p)
+func AddProducts(product *Product) {
+	product.ID = getNextID()
+	productList = append(productList, product)
 }
 
-func UpdateProduct(id int, p*Product)  error {
-	_, pos, err := findProduct(id)
+func UpdateProduct(id int, product*Product)  error {
+	_, position, err := findProduct(id)
 
 	if err != nil {
 		return err
 	}
 
-	p.ID = id
-	productList[pos] = p
+	product.ID = id
+	productList[position] = product
 
 	return nil
 }
 
 func getNextID() int {
-	lp := productList[len(productList) - 1]
-	return lp.ID + 1
+	lastProduct := productList[len(productList) - 1]
+	return lastProduct.ID + 1
 }
 
 var ErrorProductNotFound = fmt.Errorf("Product Not Found")
 
 func findProduct(id int) (*Product, int, error) {
-	for i, p := range productList {
-		if p.ID == id {
-			return p, i, nil
+	for i, product := range productList {
+		if product.ID == id {
+			return product, i, nil
 		}
 	}
 
