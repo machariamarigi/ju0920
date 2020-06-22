@@ -60,6 +60,18 @@ func UpdateProduct(id int, product*Product)  error {
 	return nil
 }
 
+func DeleteProduct(id int) error{
+	_, position, err := findProduct(id)
+
+	if err != nil {
+		return err
+	}
+
+	productList = append(productList[:position], productList[position+1:]...)
+
+	return nil
+}
+
 func getNextID() int {
 	lastProduct := productList[len(productList) - 1]
 	return lastProduct.ID + 1
