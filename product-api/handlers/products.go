@@ -9,107 +9,106 @@ import (
 )
 
 type Products struct {
-	l *log.Logger
+	logger *log.Logger
 }
 
-func NewProducts(l *log.Logger) *Products {
-	return &Products{l}
+func NewProducts(logger *log.Logger) *Products {
+	return &Products{logger}
 }
 
-func (p*Products) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
+func (product*Products) ServeHTTP(responseWriter http.ResponseWriter, request *http.Request) {
 	// handle GET
-	if r.Method == http.MethodGet {
-		p.getProducts(rw, r)
+	if request.Method == http.MethodGet {
+		product.getProducts(responseWriter, request)
 		return
 	}
 
 	// handle POST
-	if r.Method == http.MethodPost {
-		p.addProduct(rw, r)
+	if request.Method == http.MethodPost {
+		product.addProduct(responseWriter, request)
 		return
 	}
 
 	// handle PUT
-	if r.Method == http.MethodPut {
-		p.l.Println("PUT", r.URL.Path)
+	if request.Method == http.MethodPut {
+		product.logger.Println("PUT", request.URL.Path)
 	
-		reg := regexp.MustCompile(`/([0-9]+)`)
-		g := reg.FindAllStringSubmatch(r.URL.Path, -1)
+		regex := regexp.MustCompile(`/([0-9]+)`)
+		paramGroup := regex.FindAllStringSubmatch(request.URL.Path, -1)
 
-		if len(g) != 1 {
-			p.l.Println("Invalid URI more than one id")
-			http.Error(rw, "Invalid URL", http.StatusBadRequest)
+		if len(paramGroup) != 1 {
+			product.logger.Println("Invalid URI more than one id")
+			http.Error(responseWriter, "Invalid URL", http.StatusBadRequest)
 			return
 		}
 
-		if len(g[0]) != 2 {
-			p.l.Println("Invalid URI more than one capture group")
-			http.Error(rw, "Invalid URL", http.StatusBadRequest)
+		if len(paramGroup[0]) != 2 {
+			product.logger.Println("Invalid URI more than one capture group")
+			http.Error(responseWriter, "Invalid URL", http.StatusBadRequest)
 			return
 		}
 
-		idString := g[0][1]
+		idString := paramGroup[0][1]
 		id, err := strconv.Atoi(idString)
 
 		if err != nil {
-			p.l.Println("Invalid URI unable to convert to numer", idString)
-			http.Error(rw, "Invalid URL", http.StatusBadRequest)
+			product.logger.Println("Invalid URI unable to convert to numer", idString)
+			http.Error(responseWriter, "Invalid URL", http.StatusBadRequest)
 			return
 		}
 
-		p.updateProduct(id, rw, r)
+		product.updateProduct(id, responseWriter, request)
 		return
 	}
 
 	// catch all
-	rw.WriteHeader(http.StatusMethodNotAllowed)
+	responseWriter.WriteHeader(http.StatusMethodNotAllowed)
 }
 
-func (p*Products) getProducts(rw http.ResponseWriter, r *http.Request) {
-	p.l.Println("Handle GET Products")
+func (product*Products) getProducts(responseWriter http.ResponseWriter, request *http.Request) {
+	product.logger.Println("Handle GET Products")
 
 	// fetch the products from the datastore
-	pl := data.GetProducts()
+	products := data.GetProducts()
 
 	// serailize the list to JSON
-	err := pl.ToJSON(rw)
+	err := products.ToJSON(responseWriter)
 	if err != nil {
-		http.Error(rw, "unable to encode json", http.StatusInternalServerError)
+		http.Error(responseWriter, "unable to encode json", http.StatusInternalServerError)
 	}
 }
 
-func (p*Products) addProduct(rw http.ResponseWriter, r *http.Request) {
-	p.l.Println("Handle POST Products")
+func (products*Products) addProduct(responseWriter http.ResponseWriter, request *http.Request) {
+	products.logger.Println("Handle POST Products")
 
-	prod := &data.Product{}
+	product := &data.Product{}
 
-	err := prod.FromJSON(r.Body)
+	err := product.FromJSON(request.Body)
 	if err != nil {
-		http.Error(rw, "Unable to decode JSON", http.StatusBadRequest)
+		http.Error(responseWriter, "Unable to decode JSON", http.StatusBadRequest)
 	}
 
-	data.AddProducts(prod)
+	data.AddProducts(product)
 }
 
-func (p Products) updateProduct(id int, rw http.ResponseWriter, r *http.Request) {
-	p.l.Println("Handle PUT Product")
+func (products Products) updateProduct(id int, responseWriter http.ResponseWriter, request *http.Request) {
+	products.logger.Println("Handle PUT Product")
 
-	prod := &data.Product{}
+	product := &data.Product{}
 
-	err := prod.FromJSON(r.Body)
+	err := product.FromJSON(request.Body)
 	if err != nil {
-		http.Error(rw, "Unable to decode JSON", http.StatusBadRequest)
+		http.Error(responseWriter, "Unable to decode JSON", http.StatusBadRequest)
 	}
-
-	err = data.UpdateProduct(id, prod)
+	err = data.UpdateProduct(id, product)
 
 	if err == data.ErrorProductNotFound {
-		http.Error(rw, "Product not found", http.StatusNotFound)
+		http.Error(responseWriter, "Product not found", http.StatusNotFound)
 		return
 	}
 
 	if err != nil {
-		http.Error(rw, "Something went wrong", http.StatusInternalServerError)
+		http.Error(responseWriter, "Something went wrong", http.StatusInternalServerError)
 		return
 	}
 }
