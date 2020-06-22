@@ -61,6 +61,35 @@ func (product*Products) ServeHTTP(responseWriter http.ResponseWriter, request *h
 		return
 	}
 
+	if request.Method == http.MethodDelete {
+		regex := regexp.MustCompile(`/([0-9]+)`)
+		paramGroup := regex.FindAllStringSubmatch(request.URL.Path, -1)
+
+		if len(paramGroup) != 1 {
+			product.logger.Println("Invalid URI more than one id")
+			http.Error(responseWriter, "Invalid URL", http.StatusBadRequest)
+			return
+		}
+
+		if len(paramGroup[0]) != 2 {
+			product.logger.Println("Invalid URI more than one capture group")
+			http.Error(responseWriter, "Invalid URL", http.StatusBadRequest)
+			return
+		}
+
+		idString := paramGroup[0][1]
+		id, err := strconv.Atoi(idString)
+
+		if err != nil {
+			product.logger.Println("Invalid URI unable to convert to numer", idString)
+			http.Error(responseWriter, "Invalid URL", http.StatusBadRequest)
+			return
+		}
+		product.deleteProduct(id, responseWriter, request)
+		return
+	}
+
+
 	// catch all
 	responseWriter.WriteHeader(http.StatusMethodNotAllowed)
 }
@@ -111,4 +140,10 @@ func (products Products) updateProduct(id int, responseWriter http.ResponseWrite
 		http.Error(responseWriter, "Something went wrong", http.StatusInternalServerError)
 		return
 	}
+}
+
+func (product*Products) deleteProduct(id int, responseWriter http.ResponseWriter, request *http.Request) {
+	product.logger.Println("Handle DELETE Products")
+
+	data.DeleteProduct(id)
 }
