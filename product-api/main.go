@@ -23,12 +23,12 @@ func main()  {
 
 	// create a new server
 	s := &http.Server {
-		Addr: 				":9090",						// configure the bind address		
-		Handler: 			sm,									// set the default handelr
-		ErrorLog:			l,									// set set the logger for the server
-		IdleTimeout:	120 * time.Second,	// max time for connections using TCP Keep-Alive
-		ReadTimeout:	1 * time.Second,		// max time to read request from client
-		WriteTimeout:	1 * time.Second,		// max time to write request from client
+		Addr:            ":9090",              // configure the bind address		
+		Handler:         sm,                   // set the default handelr
+		ErrorLog:        l,                    // set set the logger for the server
+		IdleTimeout:     120 * time.Second,    // max time for connections using TCP Keep-Alive
+		ReadTimeout:     1 * time.Second,      // max time to read request from client
+		WriteTimeout:    1 * time.Second,      // max time to write request from client
 	}
 
 
