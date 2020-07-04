@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"strconv"
+	"context"
 	"github.com/gorilla/mux"
 	"github.com/machariamarigi/ju0920/product-api/data"
 	"net/http"
@@ -34,14 +35,9 @@ func (product*Products) GetProducts(responseWriter http.ResponseWriter, request 
 func (products*Products) AddProduct(responseWriter http.ResponseWriter, request *http.Request) {
 	products.logger.Println("Handle POST Products")
 
-	product := &data.Product{}
+	product := request.Context().Value(KeyProduct{}).(data.Product)
 
-	err := product.FromJSON(request.Body)
-	if err != nil {
-		http.Error(responseWriter, "Unable to decode JSON", http.StatusBadRequest)
-	}
-
-	data.AddProducts(product)
+	data.AddProducts(&product)
 }
 
 // UpdateProduct updates a product in the data store
@@ -53,15 +49,10 @@ func (products Products) UpdateProduct(responseWriter http.ResponseWriter, reque
 		return
 	}
 
-	products.logger.Println("Handle PUT Product")
+	products.logger.Println("Handle PUT Product", id)
 
-	product := &data.Product{}
-
-	err = product.FromJSON(request.Body)
-	if err != nil {
-		http.Error(responseWriter, "Unable to decode JSON", http.StatusBadRequest)
-	}
-	err = data.UpdateProduct(id, product)
+	product := request.Context().Value(KeyProduct{}).(data.Product)
+	err = data.UpdateProduct(id, &product)
 
 	if err == data.ErrorProductNotFound {
 		http.Error(responseWriter, "Product not found", http.StatusNotFound)
@@ -86,4 +77,25 @@ func (product*Products) DeleteProduct(responseWriter http.ResponseWriter, reques
 	product.logger.Println("Handle DELETE Products")
 
 	data.DeleteProduct(id)
+}
+
+type KeyProduct struct{}
+
+func (products *Products) MiddlewareProductValidation(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(responseWriter http.ResponseWriter, request *http.Request) {
+		product := data.Product{}
+
+		err := product.FromJSON(request.Body)
+		if err != nil {
+			http.Error(responseWriter, "Unable to decode JSON", http.StatusBadRequest)
+			return
+		}
+		
+		// add the product to the context
+		ctx := context.WithValue(request.Context(), KeyProduct{}, product)
+		request = request.WithContext(ctx)
+
+		// Call the next handler, which can be another middleware in the chain, or the final handler.
+		next.ServeHTTP(responseWriter, request)
+	})
 }
