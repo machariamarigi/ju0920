@@ -7,6 +7,7 @@ import (
 	"github.com/machariamarigi/ju0920/product-api/data"
 	"net/http"
 	"log"
+	"fmt"
 )
 
 type Products struct {
@@ -89,6 +90,15 @@ func (products *Products) MiddlewareProductValidation(next http.Handler) http.Ha
 		if err != nil {
 			http.Error(responseWriter, "Unable to decode JSON", http.StatusBadRequest)
 			return
+		}
+
+		err = product.Validate()
+		if err != nil {
+			products.logger.Println("[ERROR] validating product", err)
+			http.Error(
+				responseWriter,
+				fmt.Sprintf("Error Validating product: %s", err),
+				http.StatusBadRequest)
 		}
 		
 		// add the product to the context

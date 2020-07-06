@@ -5,15 +5,18 @@ import (
 	"encoding/json"
 	"io"
 	"time"
+	"regexp"
+
+	"github.com/go-playground/validator/v10"
 )
 
 // Product defines the structure of an API product
 type Product struct {
 	ID           int     `json:"id"`
-	Name         string  `json:"name"`
+	Name         string  `json:"name" validate:"required"`
 	Description  string  `json:"description"`
-	Price        float32 `json:"price"`
-	SKU          string  `json:"sku"`
+	Price        float32 `json:"price" validate:"gt=0"`
+	SKU          string  `json:"sku" validate:"required,sku"`
 	CreatedOn    string  `json:"_"`
 	UpdatedOn    string  `json:"_"`
 	DeletedOn    string  `json:"_"`
@@ -21,10 +24,33 @@ type Product struct {
 
 // FromJSON decodes json serialized content using json package's NeWDecoder
 // https://golang.org/pkg/encoding/json/#NewDecoder
-func (product *Product ) FromJSON(r io.Reader) error{
+func (product *Product) FromJSON(r io.Reader) error{
 	decoder := json.NewDecoder(r)
 	return decoder.Decode(product)
 }
+
+// Validate does JSON validation for our products using the Package Validator
+// https://github.com/go-playground/validator
+func (product *Product) Validate() error {
+	validate := validator.New()
+	validate.RegisterValidation("sku", skuValidation)
+
+	return validate.Struct(product)
+}
+
+func skuValidation(fl validator.FieldLevel) bool {
+	// SKU format is ddfg-eews-fffr
+
+	regex := regexp.MustCompile(`[a-z]+-[a-z]+-[a-z]+`)
+	matches := regex.FindAllString(fl.Field().String(), -1)
+
+	if len(matches) != 1 {
+		return false
+	}
+
+	return true
+}
+
 
 
 // Products is a collection of Product
@@ -92,7 +118,7 @@ func findProduct(id int) (*Product, int, error) {
 
 // ProductList is a list of static product data
 var productList = []*Product{
-	&Product{
+	{
 		ID:             1,
 		Name:           "Latte",
 		Description:    "Frothy, miky coffee",
@@ -101,7 +127,7 @@ var productList = []*Product{
 		CreatedOn:      time.Now().UTC().String(),
 		UpdatedOn:      time.Now().UTC().String(),
 	},
-	&Product{
+	{
 		ID:               2,
 		Name:            "Espresso",
 		Description:     "Short and strong coffee without milk",
