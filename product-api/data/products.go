@@ -22,6 +22,9 @@ type Product struct {
 	DeletedOn    string  `json:"_"`
 }
 
+// ErrorProductNotFound is an error raised when a product is not found in the store
+var ErrorProductNotFound = fmt.Errorf("Product Not Found")
+
 // FromJSON decodes json serialized content using json package's NeWDecoder
 // https://golang.org/pkg/encoding/json/#NewDecoder
 func (product *Product) FromJSON(r io.Reader) error{
@@ -68,32 +71,37 @@ func GetProducts() Products {
 	return productList
 }
 
-func AddProducts(product *Product) {
+// AddProduct adds a new product to the store
+func AddProduct(product *Product) {
 	product.ID = getNextID()
 	productList = append(productList, product)
 }
 
-func UpdateProduct(id int, product*Product)  error {
-	_, position, err := findProduct(id)
 
-	if err != nil {
-		return err
+// UpdateProduct replaces a product in the store with the given item
+// If a product with the given id does not exist in the database
+// this function returns a ProductNotFound error
+func UpdateProduct(product Product)  error {
+	index := findIndexByProductID(product.ID)
+
+	if index == -1 {
+		return ErrorProductNotFound
 	}
 
-	product.ID = id
-	productList[position] = product
+	productList[index] = &product
 
 	return nil
 }
 
+// DeleteProduct removes product from the store
 func DeleteProduct(id int) error{
-	_, position, err := findProduct(id)
+	index := findIndexByProductID(id)
 
-	if err != nil {
-		return err
+	if index == -1 {
+		return ErrorProductNotFound
 	}
 
-	productList = append(productList[:position], productList[position+1:]...)
+	productList = append(productList[:index], productList[index+1])
 
 	return nil
 }
@@ -103,22 +111,21 @@ func getNextID() int {
 	return lastProduct.ID + 1
 }
 
-var ErrorProductNotFound = fmt.Errorf("Product Not Found")
-
-func findProduct(id int) (*Product, int, error) {
-	for i, product := range productList {
+// findIndex finds the index of a product in the store
+// returns -1 when no product can be found
+func findIndexByProductID(id int) int {
+	for index, product := range productList {
 		if product.ID == id {
-			return product, i, nil
+			return index
 		}
 	}
-
-	return nil, -1, ErrorProductNotFound
+	return -1
 }
 
 
 // ProductList is a list of static product data
 var productList = []*Product{
-	{
+	&Product{
 		ID:             1,
 		Name:           "Latte",
 		Description:    "Frothy, miky coffee",
@@ -127,7 +134,7 @@ var productList = []*Product{
 		CreatedOn:      time.Now().UTC().String(),
 		UpdatedOn:      time.Now().UTC().String(),
 	},
-	{
+	&Product{
 		ID:               2,
 		Name:            "Espresso",
 		Description:     "Short and strong coffee without milk",
