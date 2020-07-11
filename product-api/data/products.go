@@ -2,8 +2,6 @@ package data
 
 import (
 	"fmt"
-	"encoding/json"
-	"io"
 	"time"
 	"regexp"
 
@@ -24,13 +22,6 @@ type Product struct {
 
 // ErrorProductNotFound is an error raised when a product is not found in the store
 var ErrorProductNotFound = fmt.Errorf("Product Not Found")
-
-// FromJSON decodes json serialized content using json package's NeWDecoder
-// https://golang.org/pkg/encoding/json/#NewDecoder
-func (product *Product) FromJSON(r io.Reader) error{
-	decoder := json.NewDecoder(r)
-	return decoder.Decode(product)
-}
 
 // Validate does JSON validation for our products using the Package Validator
 // https://github.com/go-playground/validator
@@ -59,12 +50,7 @@ func skuValidation(fl validator.FieldLevel) bool {
 // Products is a collection of Product
 type Products []*Product
 
-// ToJSON serializes contents of the collection to JSON using json package's NeWEncoder
-// https://golang.org/pkg/encoding/json/#NewEncoder
-func (products*Products) ToJSON(requestWriter io.Writer) error {
-	encoder := json.NewEncoder(requestWriter)
-	return encoder.Encode(products)
-}
+
 
 // GetProducts returns a list of the products
 func GetProducts() Products {
