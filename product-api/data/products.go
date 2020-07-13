@@ -3,9 +3,6 @@ package data
 import (
 	"fmt"
 	"time"
-	"regexp"
-
-	"github.com/go-playground/validator/v10"
 )
 
 // Product defines the structure of an API product
@@ -13,7 +10,7 @@ type Product struct {
 	ID           int     `json:"id"`
 	Name         string  `json:"name" validate:"required"`
 	Description  string  `json:"description"`
-	Price        float32 `json:"price" validate:"gt=0"`
+	Price        float32 `json:"price" validate:"required,gt=0"`
 	SKU          string  `json:"sku" validate:"required,sku"`
 	CreatedOn    string  `json:"_"`
 	UpdatedOn    string  `json:"_"`
@@ -23,34 +20,8 @@ type Product struct {
 // ErrorProductNotFound is an error raised when a product is not found in the store
 var ErrorProductNotFound = fmt.Errorf("Product Not Found")
 
-// Validate does JSON validation for our products using the Package Validator
-// https://github.com/go-playground/validator
-func (product *Product) Validate() error {
-	validate := validator.New()
-	validate.RegisterValidation("sku", skuValidation)
-
-	return validate.Struct(product)
-}
-
-func skuValidation(fl validator.FieldLevel) bool {
-	// SKU format is ddfg-eews-fffr
-
-	regex := regexp.MustCompile(`[a-z]+-[a-z]+-[a-z]+`)
-	matches := regex.FindAllString(fl.Field().String(), -1)
-
-	if len(matches) != 1 {
-		return false
-	}
-
-	return true
-}
-
-
-
 // Products is a collection of Product
 type Products []*Product
-
-
 
 // GetProducts returns a list of the products
 func GetProducts() Products {
@@ -58,9 +29,10 @@ func GetProducts() Products {
 }
 
 // AddProduct adds a new product to the store
-func AddProduct(product *Product) {
-	product.ID = getNextID()
-	productList = append(productList, product)
+func AddProduct(product Product) {
+	maxID := productList[len(productList)-1].ID
+	product.ID = maxID + 1
+	productList = append(productList, &product)
 }
 
 
