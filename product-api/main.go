@@ -11,6 +11,7 @@ import (
 
 	"github.com/nicholasjackson/env"
 	"github.com/machariamarigi/ju0920/product-api/handlers"
+	"github.com/machariamarigi/ju0920/product-api/data"
 )
 
 var bindAddress = env.String("BindAddress", false, ":9090", "Bind Address To The Server")
@@ -21,26 +22,27 @@ func main()  {
 
 
 	logger := log.New(os.Stdout, "product-api: ", log.LstdFlags)
+	validator := data.NewValidation()
 
 	// create handlers
-	productHandler := handlers.NewProducts(logger)
+	productHandler := handlers.NewProducts(logger, validator)
 
 	// create a new server multiplexer and register handlers with their routes
 	router := mux.NewRouter()
 
 	getRouter := router.Methods(http.MethodGet).Subrouter()
-	getRouter.HandleFunc("/", productHandler.GetProducts)
+	getRouter.HandleFunc("/products", productHandler.ListAll)
 
 	postRouter := router.Methods(http.MethodPost).Subrouter()
-	postRouter.HandleFunc("/", productHandler.AddProduct)
+	postRouter.HandleFunc("/products", productHandler.Create)
 	postRouter.Use(productHandler.MiddlewareProductValidation)
 
 	putRouter := router.Methods(http.MethodPut).Subrouter()
-	putRouter.HandleFunc("/{id:[0-9]+}", productHandler.UpdateProduct)
+	putRouter.HandleFunc("/products/{id:[0-9]+}", productHandler.Update)
 	putRouter.Use(productHandler.MiddlewareProductValidation)
 
 	deleteRouter := router.Methods(http.MethodDelete).Subrouter()
-	deleteRouter.HandleFunc("/{id:[0-9]+}", productHandler.DeleteProduct)
+	deleteRouter.HandleFunc("/products/{id:[0-9]+}", productHandler.Delete)
 
 	// create a new server
 	server := &http.Server {
