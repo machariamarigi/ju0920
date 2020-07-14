@@ -15,6 +15,18 @@ paths:
           $ref: '#/responses/productsResponse'
       tags:
       - products
+    post:
+      description: Create a new product
+      operationId: createProduct
+      responses:
+        "200":
+          $ref: '#/responses/productResponse'
+        "422":
+          $ref: '#/responses/errorValidation'
+        "501":
+          $ref: '#/responses/errorResponse'
+      tags:
+      - products
   /products/{id}:
     get:
       description: Return a list of products from the database
