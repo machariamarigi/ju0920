@@ -6,6 +6,14 @@ import (
 	"github.com/machariamarigi/ju0920/product-api/data"
 )
 
+// swagger:route DELETE /products/{id} products deleteProduct
+// Delete a product
+//
+// responses:
+//	201: noContentResponse
+//  404: errorResponse
+//  501: errorResponse
+
 // Delete handles DELETE requests and removes items from the store
 func (products *Products) Delete(responseWriter http.ResponseWriter, request *http.Request) {
 	id := getProductID(request)
