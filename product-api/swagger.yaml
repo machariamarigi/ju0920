@@ -15,6 +15,17 @@ paths:
           $ref: '#/responses/productsResponse'
       tags:
       - products
+  /products/{id}:
+    get:
+      description: Return a list of products from the database
+      operationId: listSingle
+      responses:
+        "200":
+          $ref: '#/responses/productResponse'
+        "404":
+          $ref: '#/responses/errorResponse'
+      tags:
+      - products
 produces:
 - application/json
 schemes:

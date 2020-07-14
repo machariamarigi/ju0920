@@ -28,6 +28,18 @@ func GetProducts() Products {
 	return productList
 }
 
+// GetProductByID returns a single product which matches the id from the store
+// If a product is not found this function returns a ProductNotFound error
+func GetProductByID(id int) (*Product, error) {
+	index := findIndexByProductID(id)
+
+	if index == -1 {
+		return nil, ErrorProductNotFound
+	}
+
+	return productList[index], nil
+}
+
 // AddProduct adds a new product to the store
 func AddProduct(product Product) {
 	maxID := productList[len(productList)-1].ID
