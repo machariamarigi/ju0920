@@ -6,6 +6,10 @@ import (
 	"github.com/machariamarigi/ju0920/product-api/data"
 )
 
+// swagger:route GET /products products listProducts
+// Return a list of products from the database
+// responses:
+//	200: productsResponse
 // ListAll handles GET requests for all products
 func (product*Products) ListAll(responseWriter http.ResponseWriter, request *http.Request) {
 	product.logger.Println("Handle GET Products")
