@@ -81,19 +81,21 @@ func skuValidation(fl validator.FieldLevel) bool {
 //			fmt.Println()
 //	}
 func (validation *Validation) Validate(inf interface{}) ValidationErrors {
-	errs := validation.validate.Struct(inf).(validator.ValidationErrors)
+	errs := validation.validate.Struct(inf)
 
-	if len(errs) == 0 {
+	if errs == nil {
 		return nil
 	}
 
 	var returnErrs []ValidationError
 
-	for _, err := range errs {
+	for _, err := range errs.(validator.ValidationErrors) {
 		validationError := ValidationError{err.(validator.FieldError)}
 		returnErrs = append(returnErrs, validationError)
 	}
 
 	return returnErrs
 }
+
+
 

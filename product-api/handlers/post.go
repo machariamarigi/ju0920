@@ -18,7 +18,7 @@ import (
 func (products*Products) Create(responseWriter http.ResponseWriter, request *http.Request) {
 	products.logger.Println("Handle POST Products")
 
-	product := request.Context().Value(KeyProduct{}).(data.Product)
+	product := request.Context().Value(KeyProduct{}).(*data.Product)
 
 	data.AddProduct(product)
 }

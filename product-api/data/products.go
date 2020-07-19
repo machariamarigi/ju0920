@@ -35,7 +35,7 @@ type Product struct {
 	//
 	// required: true
 	// pattern: [a-z]+-[a-z]+-[a-z]+
-	SKU          string  `json:"sku" validate:"required,sku"`
+	SKU          string  `json:"sku" validate:"sku"`
 }
 
 // ErrorProductNotFound is an error raised when a product is not found in the store
@@ -62,10 +62,10 @@ func GetProductByID(id int) (*Product, error) {
 }
 
 // AddProduct adds a new product to the store
-func AddProduct(product Product) {
+func AddProduct(product *Product) {
 	maxID := productList[len(productList)-1].ID
 	product.ID = maxID + 1
-	productList = append(productList, &product)
+	productList = append(productList, product)
 }
 
 
