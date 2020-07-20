@@ -16,10 +16,12 @@ import (
 
 // Update updates a product in the data store
 func (products Products) Update(responseWriter http.ResponseWriter, request *http.Request) {
-	product := request.Context().Value(KeyProduct{}).(data.Product)
+	id := getProductID(request)
+	product := request.Context().Value(KeyProduct{}).(*data.Product)
 
-	products.logger.Println("[DEBUG] Handle PUT Product", product.ID)
+	products.logger.Println("[DEBUG] Handle PUT Product", id)
 
+	product.ID = id
 	err := data.UpdateProduct(product)
 
 	if err == data.ErrorProductNotFound {

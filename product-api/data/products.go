@@ -72,14 +72,14 @@ func AddProduct(product *Product) {
 // UpdateProduct replaces a product in the store with the given item
 // If a product with the given id does not exist in the database
 // this function returns a ProductNotFound error
-func UpdateProduct(product Product)  error {
+func UpdateProduct(product *Product)  error {
 	index := findIndexByProductID(product.ID)
 
 	if index == -1 {
 		return ErrorProductNotFound
 	}
 
-	productList[index] = &product
+	productList[index] = product
 
 	return nil
 }
